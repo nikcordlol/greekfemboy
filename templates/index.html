@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta name="color-scheme" content="dark"/>
+<title>Mochi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --background:#111111; --text:#d9d9d9; --border:#303030;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --green:#4ade80; --red:#f87171;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+html { background:var(--background); }
+html, body { min-height:100%; }
+body {
+  min-width:0; background:var(--background); color:var(--text);
+  font-family:'Instrument Sans', sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+body.locked { overflow:hidden; }
+button { font:inherit; }
+
+/* ── topography canvas background (same algorithm as madium-clone site.js) ── */
+.topography { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+
+/* ── views ── */
+.view { display:none; position:relative; min-height:100svh; }
+.view.active { display:block; animation:view-in 360ms var(--ease) both; }
+@keyframes view-in { from { opacity:0; transform:translateY(1.4%) scale(.992); } to { opacity:1; transform:none; } }
+@media (prefers-reduced-motion:reduce) { .view.active { animation:none; } }
+
+/* ═══════════ HOME (exact madium-clone home layout) ═══════════ */
+.brand {
+  position:absolute; top:calc(50% - 158px); left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center;
+}
+.logo {
+  font-size:38px; font-weight:600; letter-spacing:-1.5px; color:#e7e7e7;
+  user-select:none; line-height:1.2;
+}
+.avatar {
+  width:84px; height:84px; margin-top:14px; border-radius:50%; object-fit:cover;
+  border:2px solid var(--border); background:#171717;
+}
+.actions {
+  position:absolute; top:calc(50% + 24px); left:24px; right:24px;
+  display:flex; flex-direction:column; align-items:center;
+}
+.action-row { display:flex; gap:18px; }
+.action-button {
+  position:relative; width:190px; height:54px; overflow:hidden; cursor:pointer;
+  border:2px solid var(--border); border-radius:8px; background:#171717; color:#888;
+  text-decoration:none; display:grid; place-items:center;
+  font-size:23px; font-weight:500;
+  transition:color 220ms var(--ease), border-color 240ms var(--ease), background-color 240ms var(--ease);
+}
+.action-button:focus-visible, .social-link:focus-visible { outline:2px solid #bbb; outline-offset:3px; }
+.action-button:hover { color:var(--text); border-color:#5b5b5b; }
+.button-icon {
+  position:absolute; bottom:-20px; width:90px; height:90px; color:rgb(115 115 115 / 16%);
+  display:grid; place-items:center;
+  transition:color 240ms var(--ease);
+}
+.action-button:hover .button-icon { color:rgb(187 187 187 / 24%); }
+.icon-left { left:-20px; }
+.icon-right { right:-20px; }
+.button-icon svg { width:60px; height:60px; }
+.socials {
+  width:184px; height:52px; margin-top:22px; display:flex; justify-content:center; overflow:hidden;
+  border:2px solid var(--border); border-radius:8px; background:#171717;
+  transition:border-color 240ms var(--ease);
+}
+.socials:hover { border-color:#555; }
+.social-link {
+  width:60px; height:48px; display:grid; place-items:center; color:#787878; text-decoration:none;
+  transition:color 220ms var(--ease);
+}
+.social-link:hover { color:var(--text); }
+.social-link svg { width:21px; height:21px; display:block; }
+.footer {
+  position:absolute; bottom:82px; left:24px; right:24px; color:#505050;
+  font-size:16px; line-height:1.45; text-align:center;
+}
+.legal-links { display:flex; flex-wrap:wrap; justify-content:center; gap:4px 12px; font-size:12px; line-height:1.45; }
+.legal-links a { color:#505050; text-decoration-color:#303030; transition:color 220ms var(--ease), text-decoration-color 220ms var(--ease); }
+.legal-links a:hover { color:#929292; text-decoration-color:#666; }
+@media (max-width:560px) {
+  .brand { top:calc(50% - 146px); }
+  .logo { font-size:min(38px, 9.75vw); }
+  .avatar { width:72px; height:72px; margin-top:12px; }
+  .actions { top:calc(50% + 12px); left:20px; right:20px; }
+  .action-row { width:min(330px, 100%); flex-direction:column; gap:12px; }
+  .action-button { width:100%; height:52px; font-size:21px; }
+  .footer { bottom:38px; }
+  .legal-links { max-width:330px; }
+}
+@media (max-width:189px) { .action-button { font-size:16px; } }
+
+/* ═══════════ SMS ARACI VIEW ═══════════ */
+.sms-topbar {
+  position:sticky; top:0; z-index:3; height:64px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 28px; border-bottom:1px solid rgb(48 48 48 / 78%);
+  background:rgb(17 17 17 / 88%); backdrop-filter:blur(14px);
+}
+.sms-wordmark { font-size:20px; font-weight:600; letter-spacing:-.5px; color:#e7e7e7; text-decoration:none; }
+.sms-back {
+  padding:8px 14px; border:0; background:transparent; color:#666; cursor:pointer; font-size:16px;
+  text-decoration:underline; text-decoration-color:#454545;
+  transition:color 220ms var(--ease), text-decoration-color 220ms var(--ease);
+}
+.sms-back:hover { color:#929292; text-decoration-color:#666; }
+.sms-main { display:grid; place-items:center; min-height:calc(100svh - 64px); padding:20px; }
+.sms-panel { display:flex; flex-direction:column; align-items:center; animation:view-in 360ms var(--ease) both; }
+.sms-title { margin:0 0 28px; color:#e7e7e7; font-size:20px; font-weight:600; letter-spacing:-.5px; }
+.sms-form { width:190px; display:grid; gap:12px; }
+@media (max-width:560px) { .sms-form { width:min(330px, calc(100vw - 40px)); } }
+.sms-field { display:grid; gap:6px; text-align:left; }
+.sms-label { color:#777; font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; }
+.sms-input {
+  width:100%; padding:12px 14px; border:1px solid #363636; border-radius:7px; outline:none;
+  background:#171717; color:#ddd; font:inherit; font-size:14px;
+  transition:border-color 180ms var(--ease), background-color 180ms var(--ease), box-shadow 180ms var(--ease);
+}
+.sms-input:focus { border-color:#656565; background:#1a1a1a; box-shadow:0 0 0 3px rgb(255 255 255 / 5%); }
+.sms-input::placeholder { color:#4d4d4d; }
+.btn-row { display:flex; gap:10px; margin-top:4px; }
+.btn-row button { flex:1; }
+.start-btn, .stop-btn {
+  position:relative; height:54px; overflow:hidden; cursor:pointer;
+  border:2px solid var(--border); border-radius:8px; background:#171717; color:#888;
+  display:grid; place-items:center; font-size:19px; font-weight:500;
+  transition:color 220ms var(--ease), border-color 240ms var(--ease), background-color 240ms var(--ease);
+}
+.start-btn:hover, .stop-btn:hover { color:var(--text); border-color:#5b5b5b; }
+.start-btn:focus-visible, .stop-btn:focus-visible { outline:2px solid #bbb; outline-offset:3px; }
+.stop-btn { display:none; }
+.err { color:var(--red); font-size:13px; margin-top:2px; display:none; text-align:center; }
+.status-area { display:flex; align-items:center; gap:9px; margin-top:22px; }
+.dot { width:8px; height:8px; border-radius:50%; background:#3a3a3a; transition:background .3s ease; }
+.dot-active { background:var(--green); box-shadow:0 0 10px rgba(74,222,128,.5); animation:pulse 1.4s ease infinite; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.45; } }
+#statusLabel { color:#666; font-size:12px; letter-spacing:.08em; }
+#statusLabel.active { color:var(--green); }
+@media (prefers-reduced-motion:reduce) { .dot-active { animation:none; } }
+</style>
+</head>
+<body>
+
+<!-- ═══ ANA SAYFA ═══ -->
+<section class="view active" id="view-home">
+  <canvas aria-hidden="true" class="topography" id="topo-home"></canvas>
+  <div class="brand">
+    <div class="logo">Mochi</div>
+    <img class="avatar" id="discord-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Discord">
+  </div>
+  <div class="actions">
+    <div class="action-row">
+      <a class="action-button" href="#sms">
+        <span class="button-icon icon-left" aria-hidden="true">
+          <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </span>
+        SMS Aracı
+      </a>
+    </div>
+    <nav class="socials" aria-label="Social links">
+      <a class="social-link" href="#" aria-label="YouTube" title="YouTube">
+        <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+      </a>
+      <a class="social-link" href="#" aria-label="Discord" title="Discord">
+        <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
+      </a>
+      <a class="social-link" href="#" aria-label="Mağaza" title="Mağaza">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 7h12l1 14H5L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>
+      </a>
+    </nav>
+  </div>
+  <footer class="footer">
+    <nav class="legal-links" aria-label="Site links">
+      <a href="#">Şartlar</a>
+      <a href="#">Yasal</a>
+      <a href="#">Gizlilik</a>
+      <a href="#">EULA</a>
+      <a href="#">DMCA</a>
+      <a href="#">Bayi</a>
+      <a href="#">Güvenlik</a>
+    </nav>
+  </footer>
+</section>
+
+<!-- ═══ SMS ARACI ═══ -->
+<section class="view" id="view-sms">
+  <header class="sms-topbar">
+    <a class="sms-wordmark" href="#">Mochi</a>
+    <button class="sms-back" type="button" onclick="showView('home')">← Geri</button>
+  </header>
+  <main class="sms-main">
+    <div class="sms-panel">
+      <h1 class="sms-title">SMS Aracı</h1>
+      <div class="sms-form">
+        <label class="sms-field">
+          <span class="sms-label">Telefon Numarası</span>
+          <input class="sms-input" type="text" id="tel" placeholder="5xx xxx xx xx" maxlength="10" inputmode="numeric">
+        </label>
+        <label class="sms-field">
+          <span class="sms-label">E-Posta <span style="opacity:.5;">(Opsiyonel)</span></span>
+          <input class="sms-input" type="email" id="mail" placeholder="ornek@mail.com">
+        </label>
+        <div class="btn-row">
+          <button class="start-btn" id="saveBtn" onclick="control('baslat')">Başlat</button>
+          <button class="stop-btn" id="stopBtn" onclick="control('durdur')">Durdur</button>
+        </div>
+        <div class="err" id="err">Geçerli bir numara girin.</div>
+        <div class="status-area">
+          <div class="dot" id="dot"></div>
+          <span id="statusLabel">SİSTEM BEKLEMEDE</span>
+        </div>
+      </div>
+    </div>
+  </main>
+</section>
+
+<script>
+/* ═══ view router ═══ */
+function showView(name){
+  ['home','sms'].forEach(v=>{
+    document.getElementById('view-'+v).classList.toggle('active', v===name);
+  });
+  document.body.classList.toggle('locked', name==='home');
+  window.scrollTo(0,0);
+}
+function route(){
+  const h = location.hash.replace('#','');
+  showView(h==='sms' ? 'sms' : 'home');
+}
+window.addEventListener('hashchange', route);
+
+/* ═══ topography background — identical algorithm to madium-clone site.js ═══ */
+function makeTopology(canvas) {
+  const context = canvas.getContext('2d');
+  const hash = (x, y) => { const value = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return value - Math.floor(value); };
+  const smoothstep = (lo, hi, value) => { const n = Math.max(0, Math.min(1, (value - lo) / (hi - lo))); return n * n * (3 - 2 * n); };
+  const paint = () => {
+    const bounds = canvas.getBoundingClientRect();
+    const ratio = devicePixelRatio || 1;
+    canvas.width = Math.round(bounds.width * ratio); canvas.height = Math.round(bounds.height * ratio);
+    context.setTransform(ratio, 0, 0, ratio, 0, 0); context.clearRect(0, 0, bounds.width, bounds.height);
+    const gap = bounds.width <= 560 ? 16 : 18, cols = Math.ceil(bounds.width / gap), rows = Math.ceil(bounds.height / gap);
+    const cx = bounds.width / 2, cy = bounds.height / 2;
+    for (let rr = 0; rr <= rows; rr++) for (let cc = 0; cc <= cols; cc++) {
+      const x = cc * gap + (hash(cc, rr) - .5) * 2.2, y = rr * gap + (hash(rr + 91, cc + 43) - .5) * 2.2;
+      const nx = (x - cx) / bounds.width, ny = (y - cy) / bounds.height;
+      const terrain = Math.sin(nx * 13 + ny * 3.8) * .48 + Math.sin(nx * 6.7 - ny * 12.5) * .32;
+      const rg = .5 + .5 * Math.sin(ny * 28 + terrain * 5.7 + Math.sin(nx * 8.5) * 1.4);
+      const density = smoothstep(.28, .79, Math.max(0, Math.min(1, terrain + .86))) * rg;
+      const fade = smoothstep(-.48, -.24, ny) * (1 - smoothstep(.23, .5, ny));
+      const dx = (x - cx) / (bounds.width / 2), dy = (y - cy) / (bounds.height / 2);
+      const pr = smoothstep(.18, .5, Math.sqrt(dx * dx + dy * dy));
+      const alpha = (.018 + density * .19) * fade * (.28 + pr * .72);
+      if (alpha <= .012) continue;
+      context.fillStyle = `rgb(225 225 225 / ${alpha})`; context.beginPath(); context.arc(x, y, .7 + density * .95, 0, Math.PI * 2); context.fill();
+    }
+  };
+  paint(); addEventListener('resize', paint, { once: true });
+}
+
+/* ═══ sms tool ═══ */
+function control(action) {
+  const tel = document.getElementById('tel').value;
+  const mail = document.getElementById('mail').value;
+  const err = document.getElementById('err');
+  const btnS = document.getElementById('saveBtn');
+  const btnP = document.getElementById('stopBtn');
+  const label = document.getElementById('statusLabel');
+  const dot = document.getElementById('dot');
+
+  if (action === 'baslat' && tel.replace(/\D/g, '').length < 10) {
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+
+  fetch('/islem', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({action, tel, mail})
+  }).then(r=>r.json()).then(()=>upd(action)).catch(()=>upd(action));
+
+  function upd(act) {
+    if (act === 'baslat') {
+      btnS.style.display = 'none';
+      btnP.style.display = 'grid';
+      label.textContent = 'SİSTEM AKTİF';
+      label.classList.add('active');
+      dot.classList.add('dot-active');
+    } else {
+      btnS.style.display = 'grid';
+      btnP.style.display = 'none';
+      label.textContent = 'SİSTEM BEKLEMEDE';
+      label.classList.remove('active');
+      dot.classList.remove('dot-active');
+    }
+  }
+}
+
+/* ═══ discord avatar via lanyard ═══ */
+const DISCORD_ID = '1255263112941277205';
+async function loadAvatar(){
+  const img = document.getElementById('discord-avatar');
+  const fallback = 'https://cdn.discordapp.com/embed/avatars/0.png';
+  try {
+    const r = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_ID}`);
+    const data = await r.json();
+    const u = data?.data?.discord_user;
+    if (data?.success && u?.avatar) {
+      const ext = u.avatar.startsWith('a_') ? 'gif' : 'png';
+      img.src = `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.${ext}?size=256`;
+      img.alt = u.global_name || u.username || 'Discord';
+    } else {
+      img.src = fallback;
+    }
+  } catch (_) {
+    img.src = fallback;
+  }
+}
+
+/* init */
+makeTopology(document.getElementById('topo-home'));
+route();
+loadAvatar();
+</script>
+</body>
+</html>
